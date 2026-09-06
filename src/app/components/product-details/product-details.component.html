@@ -1,0 +1,14 @@
+<div class="detail-section">
+    <div class="container-fluid">
+        <div *ngIf="product" class="product-details">
+            <img [src]="product.imageUrl" [alt]="product.name" class="img-responsive">
+            <h1>{{ product.name }}</h1>
+            <div class="price">{{ product.unitprice | currency:'USD' }}</div>
+
+            <h4>Description</h4>
+            <p>{{ product.description }}</p>
+
+            <a routerLink="/products" class="primary-btn">Back to product list</a>
+        </div>
+    </div>
+</div>
