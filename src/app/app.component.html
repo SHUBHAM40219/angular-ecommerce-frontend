@@ -1,57 +1,75 @@
-<div class="page-wrapper">
+<nav class="top-navbar">
+  <div class="brand-wrap">
+    <a routerLink="/products" class="brand-name">Shoppy</a>
+  </div>
 
-  <!-- MENU SIDEBAR-->
-  <aside class="menu-sidebar d-none d-lg-block">
-    <div class="logo">
-      <a href="#">
-        <img src="assets/images/logo.png" alt="Book2Shop" class="img-responsive">
-      </a>
-    </div>
-    <app-product-category-menu></app-product-category-menu>
-  
-  </aside>
-  <!-- END MENU SIDEBAR-->
+  <div class="nav-links">
+    <a routerLink="/products" routerLinkActive="active">Home</a>
+    <a routerLink="/products" routerLinkActive="active">Products</a>
+    <a routerLink="/products" routerLinkActive="active">Categories</a>
+    <a routerLink="/products" routerLinkActive="active">Search</a>
+  </div>
 
-  <div class="page-container">
-    <!-- HEADER DESKTOP-->
-    <header class="header-desktop">
-      <div class="section-content section-content-p30">
-        <div class="container-fluid">
-          <div class="header-wrap">
+  <div class="nav-actions">
+    <ng-container *ngIf="!isLoggedIn; else loggedInUser">
+      <button class="nav-btn secondary" routerLink="/login" [queryParams]="{ mode: 'login' }">Login</button>
+      <button class="nav-btn primary" routerLink="/login" [queryParams]="{ mode: 'signup' }">Signup</button>
+    </ng-container>
 
+    <ng-template #loggedInUser>
+      <div class="profile-menu-wrapper" [class.open]="profileMenuOpen">
+        <button type="button" class="user-menu-trigger" (click)="toggleProfileMenu($event)">
+          <img *ngIf="currentUser?.avatar" class="user-avatar profile-avatar-image" [src]="currentUser?.avatar" alt="Profile avatar" />
+          <span *ngIf="!currentUser?.avatar" class="user-avatar">{{ displayInitials }}</span>
+          <span class="user-name">{{ displayName }}</span>
+          <span class="profile-role-badge">{{ roleLabel }}</span>
+          <span class="caret">▾</span>
+        </button>
 
-            <app-search></app-search>
-            <!-- <form class="form-header" onsubmit="return false;" method="GET">
-              <input class="au-input au-input-xl" type="text" name="search" placeholder="Search for data ..." />
-              <button class="au-btn-submit" type="submit">
-                Search
-              </button>
-            </form> -->
-            <div class="cart-area">
-              <a href="shopping-detail.html">
-                <div class="total">19.22 <span> 2</span> </div> <i class="fa-solid fa-cart-shopping"></i>
-              </a>
+        <div class="profile-dropdown" *ngIf="profileMenuOpen">
+          <div class="profile-header">
+            <img *ngIf="currentUser?.avatar" class="user-avatar large profile-avatar-image" [src]="currentUser?.avatar" alt="Profile avatar" />
+            <span *ngIf="!currentUser?.avatar" class="user-avatar large">{{ displayInitials }}</span>
+            <div class="profile-meta">
+              <strong>{{ displayName }}</strong>
+              <small class="profile-role-badge">{{ roleLabel }}</small>
             </div>
           </div>
-          <div class="account-wrap"></div>
+
+          <div class="dropdown-divider"></div>
+
+          <button type="button" class="dropdown-item" (click)="navigateToProfile()">
+            <span>👤</span>
+            <span>My Profile</span>
+          </button>
+          <button type="button" class="dropdown-item" (click)="navigateToProfile()">
+            <span>📦</span>
+            <span>My Orders</span>
+          </button>
+          <button type="button" class="dropdown-item" (click)="navigateToProfile()">
+            <span>❤️</span>
+            <span>Wishlist</span>
+          </button>
+          <button type="button" class="dropdown-item" (click)="navigateToProfile()">
+            <span>⚙️</span>
+            <span>Account Settings</span>
+          </button>
+
+          <div class="dropdown-divider"></div>
+
+          <button type="button" class="dropdown-item logout-item" (click)="logout()">
+            <span>🚪</span>
+            <span>Logout</span>
+          </button>
         </div>
       </div>
-    </header>
-    <!-- END HEADER DESKTOP-->
-
-    <!-- MAIN CONTENT-->
-     <router-outlet></router-outlet>
-
-   
-
-  
-
+    </ng-template>
   </div>
-</div>
+</nav>
 
-<!-- ENDS PAGE CONTAINER -->
+<router-outlet></router-outlet>
 
-<footer>
+<footer class="app-footer">
   <ul>
     <li><a href="#">About Us</a></li>
     <li><a href="#">Contact Us</a></li>

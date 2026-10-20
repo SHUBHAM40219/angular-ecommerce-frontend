@@ -3,6 +3,7 @@ import { Product } from './product';
 describe('Product', () => {
   it('should create an instance', () => {
     const product = new Product(
+      1,
       'SKU-123',
       'Test Product',
       'A sample product description',

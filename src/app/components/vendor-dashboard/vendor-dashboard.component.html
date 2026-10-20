@@ -1,0 +1,150 @@
+<div class="dashboard-shell">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Vendor portal</p>
+      <h2>Vendor Dashboard</h2>
+    </div>
+    <span class="status-pill" [ngClass]="approvalStatus.toLowerCase()">
+      {{ approvalStatus }}
+    </span>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">Vendor status</div>
+    <div class="card-body status-card-body">
+      <p class="status-text">
+        Current account status: <strong>{{ approvalStatus }}</strong>
+      </p>
+      <p *ngIf="!isApprovedVendor" class="warning-text">
+        Your vendor account is not yet approved by the admin. You cannot add or manage products until approval is granted.
+      </p>
+      <p *ngIf="isApprovedVendor" class="success-text">
+        Your vendor account is approved. You can add and manage products normally.
+      </p>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">Product Categories</div>
+    <div class="card-body">
+      <p *ngIf="categories.length === 0" class="mb-0 text-muted">No categories to show.</p>
+      <div class="category-list">
+        <span *ngFor="let category of categories" class="category-badge">{{ category.categoryName }}</span>
+      </div>
+      <form class="category-create-form" (ngSubmit)="addCategory()">
+        <div class="category-create-field">
+          <label class="form-label" for="new-category-name">Add category</label>
+          <input id="new-category-name" class="form-control" type="text" name="newCategoryName" placeholder="Category name" maxlength="60" [(ngModel)]="newCategoryName" [disabled]="!isApprovedVendor" required />
+        </div>
+        <button class="btn btn-outline-primary" type="submit" [disabled]="!isApprovedVendor || !newCategoryName.trim()">Add category</button>
+      </form>
+      <p *ngIf="categorySuccessMessage" class="category-feedback success-text">{{ categorySuccessMessage }}</p>
+      <p *ngIf="categoryErrorMessage" class="category-feedback warning-text">{{ categoryErrorMessage }}</p>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">{{ editingProductId === null ? 'Add new product' : 'Edit product' }}</div>
+    <div class="card-body">
+      <div *ngIf="saveMessage" class="alert alert-success mt-2">{{ saveMessage }}</div>
+      <div *ngIf="errorMessage" class="alert alert-danger mt-2">{{ errorMessage }}</div>
+
+      <form (ngSubmit)="saveProduct()" [class.disabled-form]="!isApprovedVendor">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Product name</label>
+            <input class="form-control" type="text" placeholder="Product name" [(ngModel)]="newProduct.name" name="name" required [disabled]="!isApprovedVendor" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">SKU</label>
+            <input class="form-control" type="text" placeholder="SKU" [(ngModel)]="newProduct.sku" name="sku" required [disabled]="!isApprovedVendor" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Category</label>
+            <select class="form-select" [(ngModel)]="newProduct.categoryId" name="categoryId" required [disabled]="!isApprovedVendor">
+              <option [ngValue]="null" disabled>Select category</option>
+              <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.categoryName }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-4">
+            <label class="form-label">Price</label>
+            <input class="form-control" type="number" step="0.01" min="0.01" placeholder="Price" [(ngModel)]="newProduct.unitPrice" name="unitPrice" required [disabled]="!isApprovedVendor" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Stock</label>
+            <input class="form-control" type="number" min="0" placeholder="Stock" [(ngModel)]="newProduct.unitsInStock" name="unitsInStock" required [disabled]="!isApprovedVendor" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Active</label>
+            <div class="switch-box">
+              <input type="checkbox" id="product-active" [(ngModel)]="newProduct.active" name="active" [disabled]="!isApprovedVendor" />
+              <label for="product-active">Available for sale</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-8">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="4" placeholder="Description" [(ngModel)]="newProduct.description" name="description" required [disabled]="!isApprovedVendor"></textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Product image</label>
+            <input type="file" accept=".jpg,.jpeg,.png,.gif,.webp" class="form-control" (change)="onImageSelected($event)" [disabled]="!isApprovedVendor" />
+            <small class="image-hint">JPG, PNG, GIF, WEBP. Maximum size: 10 MB. {{ editingProductId !== null ? 'Choose a new image to replace the current one.' : '' }}</small>
+            <div *ngIf="imagePreview" class="image-preview-box">
+              <img [src]="imagePreview" alt="Product preview" />
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary mt-3" type="submit" [disabled]="!isApprovedVendor">
+          {{ editingProductId === null ? 'Save product' : 'Update product' }}
+        </button>
+        <button *ngIf="editingProductId !== null" class="btn btn-outline-secondary mt-3 ms-2" type="button" (click)="cancelEdit()">
+          Cancel
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">My products</div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of products">
+            <td>
+              <img *ngIf="product.imageUrl || product.image_url" [src]="productImageUrl(product)" [alt]="product.name || 'Product image'" loading="lazy" class="product-thumb" />
+              <span *ngIf="!product.imageUrl && !product.image_url" class="no-image">No image</span>
+            </td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.unitPrice || product.unitprice | currency }}</td>
+            <td>{{ product.unitsInStock }}</td>
+            <td>
+              <span class="status-badge" [class.active]="product.active">{{ product.active ? 'Active' : 'Inactive' }}</span>
+            </td>
+            <td>
+              <button class="btn btn-outline-primary btn-sm" type="button" (click)="editProduct(product)" [disabled]="!isApprovedVendor">Edit</button>
+              <button class="btn btn-outline-danger btn-sm ms-2" type="button" (click)="deleteProduct(product.id)" [disabled]="!isApprovedVendor" [attr.aria-label]="'Delete ' + product.name">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

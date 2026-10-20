@@ -1,0 +1,105 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <button type="button" class="toggle-btn" [class.active]="authMode === 'login'" (click)="chooseMode('login')">
+        Login
+      </button>
+      <button type="button" class="toggle-btn" [class.active]="authMode === 'signup'" (click)="chooseMode('signup')">
+        Signup
+      </button>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success mt-3">
+      {{ successMessage }}
+    </div>
+
+    <div *ngIf="selectedRole === null" class="role-selection">
+      <h2>{{ authMode === 'login' ? 'Choose your role' : 'Create account as' }}</h2>
+      <div class="role-grid">
+        <button *ngFor="let role of (authMode === 'login' ? loginRoles : signupRoles)" type="button" class="role-card" (click)="chooseRole(role)">
+          {{ role | titlecase }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="selectedRole !== null">
+      <div class="role-topbar">
+        <button type="button" class="back-link" (click)="backToRoles()">← Back</button>
+        <span>{{ authMode | titlecase }} as {{ selectedRole | titlecase }}</span>
+      </div>
+
+      <form *ngIf="authMode === 'login'" (ngSubmit)="login()" class="mt-3">
+        <div class="form-group">
+          <label>email</label>
+          <input
+  type="email"
+  [(ngModel)]="form.email"
+  name="email"
+  placeholder="Enter your email"
+  required
+>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div class="password-field">
+            <input [type]="showLoginPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="form.password" name="password" required />
+            <button type="button" class="password-toggle" (click)="togglePasswordVisibility('login')" aria-label="Toggle password visibility">
+              {{ showLoginPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Signing in...' : 'Login' }}
+        </button>
+      </form>
+
+      <form *ngIf="authMode === 'signup'" (ngSubmit)="signup()" class="mt-3">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" class="form-control" [(ngModel)]="signupForm.name" name="name" required />
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control" [(ngModel)]="signupForm.email" name="email" required />
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div class="password-field">
+          <input [type]="showSignupPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="signupForm.password" name="password" minlength="6" required />
+            <button type="button" class="password-toggle" (click)="togglePasswordVisibility('signup')" aria-label="Toggle password visibility">
+              {{ showSignupPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="selectedRole === 'vendor'">
+          <label>Company Name</label>
+          <input type="text" class="form-control" [(ngModel)]="signupForm.company" name="company" required />
+        </div>
+
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" class="form-control" [(ngModel)]="signupForm.phone" name="phone" pattern="[0-9]{10}" maxlength="10" inputmode="numeric" required />
+          <small class="text-danger">Please enter a valid 10-digit phone number.</small>
+        </div>
+
+        <div class="form-group">
+          <label>Address</label>
+          <textarea rows="3" class="form-control" [(ngModel)]="signupForm.address" name="address" required></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : 'Create Account' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

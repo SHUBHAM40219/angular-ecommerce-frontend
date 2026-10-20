@@ -1,0 +1,142 @@
+<div class="dashboard-shell">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Admin overview</p>
+      <h2>Vendor approval dashboard</h2>
+    </div>
+    <span class="role-pill">Admin</span>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="stat-box pending">
+        <span>Pending vendors</span>
+        <strong>{{ pendingVendorsCount }}</strong>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-box approved">
+        <span>Approved vendors</span>
+        <strong>{{ approvedVendorsCount }}</strong>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-box total">
+        <span>Total vendors</span>
+        <strong>{{ totalVendorsCount }}</strong>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-box products">
+        <span>Products</span>
+        <strong>{{ products.length }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4 approval-card">
+    <div class="card-header">
+      <div>
+        <h3>Pending vendor approvals</h3>
+        <p>{{ pendingVendorsCount }} vendor(s) awaiting review</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div *ngIf="pendingVendors.length === 0" class="empty-state">
+        <div class="empty-icon">✓</div>
+        <h4>All caught up</h4>
+        <p>No vendors currently require approval.</p>
+      </div>
+
+      <div *ngIf="pendingVendors.length > 0" class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Contact person</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let vendor of pendingVendors">
+              <td>{{ vendor.companyName || 'N/A' }}</td>
+              <td>{{ vendor.contactPerson || 'N/A' }}</td>
+              <td>{{ vendor.email }}</td>
+              <td>{{ vendor.phone || 'N/A' }}</td>
+              <td><span class="status-badge pending">Pending</span></td>
+              <td>
+                <button class="btn btn-success btn-sm me-2" (click)="approveVendor(vendor.id)">Approve</button>
+                <button class="btn btn-outline-danger btn-sm" (click)="rejectVendor(vendor.id)">Reject</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4 product-card">
+    <div class="card-header">
+      <h3>Approved vendors</h3>
+    </div>
+    <div class="card-body">
+      <div *ngIf="approvedVendors.length === 0" class="empty-state small">
+        <p>No approved vendors yet.</p>
+      </div>
+
+      <div *ngIf="approvedVendors.length > 0" class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Vendor</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Approval date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let vendor of approvedVendors">
+              <td>{{ vendor.companyName || vendor.contactPerson || 'Vendor' }}</td>
+              <td>{{ vendor.email }}</td>
+              <td><span class="status-badge approved">{{ vendor.status || 'APPROVED' }}</span></td>
+              <td>{{ vendor.approvedAt ? (vendor.approvedAt | date: 'mediumDate') : 'N/A' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card product-card">
+    <div class="card-header">
+      <h3>Product monitoring</h3>
+    </div>
+    <div class="card-body">
+      <div *ngIf="products.length === 0" class="empty-state small">
+        <p>No products available yet.</p>
+      </div>
+
+      <div *ngIf="products.length > 0" class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Vendor</th>
+              <th>Category</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of products">
+              <td>{{ product.name }}</td>
+              <td>{{ product.vendor_name || 'Unknown vendor' }}</td>
+              <td>{{ product.category_name || 'Uncategorized' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

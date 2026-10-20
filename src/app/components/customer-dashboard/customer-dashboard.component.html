@@ -1,0 +1,18 @@
+<div class="dashboard-shell">
+  <h2>Customer Dashboard</h2>
+
+  <p *ngIf="products.length === 0" class="text-muted">No product to show.</p>
+
+  <div class="row g-4">
+    <div class="col-md-4" *ngFor="let product of products">
+      <div class="card product-card h-100">
+        <div class="card-body">
+          <h5>{{ product.name }}</h5>
+          <p>{{ product.description }}</p>
+          <p class="price">{{ product.unitPrice | currency }}</p>
+          <button class="btn btn-primary">Add to cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

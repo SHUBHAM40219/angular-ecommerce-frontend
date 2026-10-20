@@ -1,32 +1,91 @@
-<div class="main-content">
-    <div class="section-content section-content-p30">
-        <div class="container-fluid">
-            <div class="row">
+<main class="catalog-page">
+    <section class="catalog-heading" aria-labelledby="catalog-title">
+        <div>
+            <p class="eyebrow">The collection</p>
+            <h1 id="catalog-title">Find your next favorite</h1>
+            <p class="catalog-subtitle">Thoughtfully picked goods, ready to make everyday better.</p>
+        </div>
+        <div *ngIf="currentUser" class="catalog-account" aria-label="Signed in account">
+            <span class="account-avatar" aria-hidden="true">{{ currentUser.name.charAt(0) || 'U' }}</span>
+            <span class="account-copy">
+                <strong>{{ currentUser.name }}</strong>
+                <span class="role-badge" [class.admin-role]="isAdmin" [class.vendor-role]="isVendor">{{ currentUser.role | titlecase }}</span>
+            </span>
+        </div>
+    </section>
 
-                <!-- loop over the collection of products -->
-                <div *ngFor="let tempProduct of products" class="col-md-3">
+    <section class="catalog-toolbar" aria-label="Product search and filters">
+        <label class="search-field">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <span class="visually-hidden">Search products</span>
+            <input type="search" [(ngModel)]="searchTerm" (ngModelChange)="currentPage = 1; applyFilters()"
+                placeholder="Search by name, description, or SKU" autocomplete="off" />
+            <button *ngIf="searchTerm" class="clear-search" type="button" aria-label="Clear search" (click)="searchTerm = ''; currentPage = 1; applyFilters()">×</button>
+        </label>
 
-                    <div class="product-box">
-                             <a [routerLink]="['/products', tempProduct.id]">
-                        <img src="{{ tempProduct.imageUrl }}" class="img-responsive">
-                        </a>
-                                 <a [routerLink]="['/products', tempProduct.id]">
-                        <h1>{{ tempProduct.name }}</h1>
-                        </a>
-                        <h1>{{ tempProduct.name }}</h1>
-                        <div class="price">{{ tempProduct.unitprice | currency:'USD' }}</div>
-                        <a href="#" class="primary-btn">Add to cart</a>
-                    </div>
-
-                </div>
-
-                <!-- <!if there are no products, display a message -->
-                <div *ngIf="products.length === 0" class="alert alert-warning col-md-12" role="alert">
-                    No products found.
-                </div>
-
-
+        <details class="category-filter">
+            <summary aria-label="Choose product categories">
+                <span>Categories</span>
+                <span class="filter-count" *ngIf="selectedCategoryIds.length">{{ selectedCategoryIds.length }}</span>
+                <span aria-hidden="true">⌄</span>
+            </summary>
+            <div class="category-options" role="group" aria-label="Filter by category">
+                <label *ngFor="let category of categories">
+                    <input type="checkbox" [checked]="selectedCategoryIds.includes(category.id)" (change)="toggleCategory(category.id)" />
+                    <span>{{ category.categoryName }}</span>
+                </label>
+                <p *ngIf="categories.length === 0" class="filter-empty">No categories available</p>
             </div>
+        </details>
+
+        <button *ngIf="searchTerm || selectedCategoryIds.length" class="reset-filters" type="button" (click)="clearFilters()">Clear filters</button>
+        <a *ngIf="isVendor" class="manage-catalog" routerLink="/vendor">Manage products <span aria-hidden="true">↗</span></a>
+        <a *ngIf="isAdmin" class="manage-catalog" routerLink="/admin">Admin dashboard <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <div class="results-line" aria-live="polite">
+        <span>{{ totalElements }} {{ totalElements === 1 ? 'product' : 'products' }}</span>
+        <span *ngIf="searchTerm">matching “{{ searchTerm }}”</span>
+    </div>
+
+    <div *ngIf="loading" class="product-grid" aria-label="Loading products" aria-busy="true">
+        <div class="product-skeleton" *ngFor="let item of [1, 2, 3, 4, 5, 6, 7, 8]">
+            <div class="skeleton-image"></div><div class="skeleton-line wide"></div><div class="skeleton-line"></div>
         </div>
     </div>
-</div>
+
+    <div *ngIf="loadError && !loading" class="catalog-message error-message" role="alert">
+        <p>{{ loadError }}</p><button type="button" (click)="loadProducts()">Try again</button>
+    </div>
+
+    <section *ngIf="!loading && !loadError && products.length" class="product-grid" aria-label="Products">
+        <article class="product-card" *ngFor="let product of products">
+            <a class="product-image" [routerLink]="['/products', product.id]" [attr.aria-label]="'View ' + product.name">
+                <img *ngIf="product.imageUrl" [src]="product.imageUrl" [alt]="product.name" loading="lazy" decoding="async" />
+                <span *ngIf="!product.imageUrl" class="image-placeholder" aria-hidden="true">{{ product.name.charAt(0) || 'S' }}</span>
+                <span class="product-category">{{ product.categoryName || 'Featured' }}</span>
+            </a>
+            <div class="product-info">
+                <p class="product-sku">{{ product.sku || 'JUST ARRIVED' }}</p>
+                <h2><a [routerLink]="['/products', product.id]">{{ product.name }}</a></h2>
+                <p class="product-description">{{ product.description }}</p>
+                <div class="product-card-footer">
+                    <strong class="product-price">{{ product.unitPrice | currency:'USD' }}</strong>
+                    <a class="quick-action" [routerLink]="['/products', product.id]" [attr.aria-label]="'View details for ' + product.name">View <span aria-hidden="true">→</span></a>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <div *ngIf="!loading && !loadError && products.length === 0" class="catalog-message empty-message" role="status">
+        <span class="empty-mark" aria-hidden="true">⌕</span><h2>No products found</h2>
+        <p>Try another search or remove a category filter.</p><button type="button" (click)="clearFilters()">Clear all filters</button>
+    </div>
+
+    <nav *ngIf="!loading && totalPages > 1" class="pagination" aria-label="Product pages">
+        <button type="button" (click)="previousPage()" [disabled]="currentPage === 1" aria-label="Previous page">←</button>
+        <button type="button" *ngFor="let page of getPageNumbers()" [class.current]="page === currentPage"
+            [attr.aria-current]="page === currentPage ? 'page' : null" (click)="changePage(page)">{{ page }}</button>
+        <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages" aria-label="Next page">→</button>
+    </nav>
+</main>
